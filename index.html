@@ -2,8 +2,24 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
   <title>Учёт рабочего времени | WorkTime Tracker</title>
+  <script>
+    /* Apply the saved theme before first paint to avoid a light flash in dark mode. */
+    (function () {
+      try {
+        var mode = localStorage.getItem("worktime_tracker_theme") || "auto";
+        var dark = mode === "dark" || (mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme-mode", mode);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +48,12 @@
       </div>
 
       <div class="header-actions">
-        <button id="settings-btn" class="btn btn-outline" title="Настройки">⚙️ Настройки</button>
+        <button id="theme-btn" class="btn btn-outline" title="Тема оформления" aria-label="Тема оформления: авто">
+          <span id="theme-icon" aria-hidden="true">🌗</span><span class="btn-label" id="theme-label">Авто</span>
+        </button>
+        <button id="settings-btn" class="btn btn-outline" title="Настройки" aria-label="Настройки">
+          <span aria-hidden="true">⚙️</span><span class="btn-label">Настройки</span>
+        </button>
       </div>
     </header>
 
@@ -90,6 +111,9 @@
     <!-- Toolbar / Action Bar -->
     <section class="toolbar">
       <div class="toolbar-left">
+        <button id="goto-today-btn" class="btn btn-secondary" title="Прокрутить к сегодняшнему дню" hidden>
+          📍 К сегодня
+        </button>
         <button id="fill-defaults-btn" class="btn btn-primary" title="Заполнить пустые рабочие дни стандартным графиком">
           ✨ Заполнить рабочие дни по умолчанию
         </button>
@@ -150,11 +174,11 @@
         </tbody>
         <tfoot>
           <tr class="totals-row">
-            <td colspan="7" class="text-right"><strong>ИТОГО ЗА МЕСЯЦ:</strong></td>
-            <td class="text-right"><strong id="total-fact">0.00 ч</strong></td>
-            <td class="text-right"><strong id="total-plan">0.00 ч</strong></td>
-            <td class="text-right"><strong id="total-delta">+0.00 ч</strong></td>
-            <td colspan="2"></td>
+            <td colspan="7" class="text-right totals-title"><strong>ИТОГО ЗА МЕСЯЦ:</strong></td>
+            <td class="text-right" data-label="Факт"><strong id="total-fact">0.00 ч</strong></td>
+            <td class="text-right" data-label="План"><strong id="total-plan">0.00 ч</strong></td>
+            <td class="text-right" data-label="Дельта"><strong id="total-delta">+0.00 ч</strong></td>
+            <td colspan="2" class="totals-spacer"></td>
           </tr>
         </tfoot>
       </table>

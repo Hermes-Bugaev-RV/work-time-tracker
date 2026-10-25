@@ -37,7 +37,37 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Tokens that differ between themes */
+  --btn-primary-bg: #1e40af;
+  --btn-primary-hover: #1d4ed8;
+  --on-primary: #ffffff;
+  --input-bg: #ffffff;
+  --input-bg-focus: #ffffff;
+  --focus-ring: rgba(30, 64, 175, 0.15);
+  --row-hover: rgba(30, 64, 175, 0.03);
+  --th-bg: #1e3a5f;
+  --th-text: #ffffff;
+  --totals-bg: #edf2f8;
+  --overlay: rgba(15, 23, 42, 0.45);
+
+  --badge-work-bg: #e2e8f0;      --badge-work-fg: #334155;
+  --badge-short-bg: #dbeafe;     --badge-short-fg: #1e40af;
+  --badge-weekend-bg: #f1f5f9;   --badge-weekend-fg: #64748b;   --badge-weekend-border: #cbd5e1;
+  --badge-holiday-bg: #fee2e2;   --badge-holiday-fg: #991b1b;
+  --badge-vacation-bg: #dcfce7;  --badge-vacation-fg: #166534;
+  --badge-sick-bg: #fef3c7;      --badge-sick-fg: #92400e;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  color-scheme: light;
 }
+
+/* The [hidden] attribute must win over component display rules (.btn etc.) */
+[hidden] { display: none !important; }
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -119,7 +149,7 @@ body {
 /* KPI Grid */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -237,11 +267,11 @@ body {
 }
 
 .btn-primary {
-  background: var(--color-primary);
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--on-primary);
 }
 .btn-primary:hover {
-  background: var(--color-primary-hover);
+  background: var(--btn-primary-hover);
 }
 
 .btn-secondary {
@@ -285,7 +315,7 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 0.875rem;
-  background: var(--color-surface);
+  background: var(--input-bg);
   color: var(--color-text);
   font-family: inherit;
   outline: none;
@@ -294,7 +324,7 @@ body {
 
 .form-select:focus, .form-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .file-upload-label {
@@ -325,12 +355,12 @@ body {
   font-weight: 600;
 }
 
-.badge-work { background: #e2e8f0; color: #334155; }
-.badge-short { background: #dbeafe; color: #1e40af; }
-.badge-weekend { background: #f1f5f9; color: #64748b; border: 1px dashed #cbd5e1; }
-.badge-holiday { background: #fee2e2; color: #991b1b; }
-.badge-vacation { background: #dcfce7; color: #166534; }
-.badge-sick { background: #fef3c7; color: #92400e; }
+.badge-work { background: var(--badge-work-bg); color: var(--badge-work-fg); }
+.badge-short { background: var(--badge-short-bg); color: var(--badge-short-fg); }
+.badge-weekend { background: var(--badge-weekend-bg); color: var(--badge-weekend-fg); border: 1px dashed var(--badge-weekend-border); }
+.badge-holiday { background: var(--badge-holiday-bg); color: var(--badge-holiday-fg); }
+.badge-vacation { background: var(--badge-vacation-bg); color: var(--badge-vacation-fg); }
+.badge-sick { background: var(--badge-sick-bg); color: var(--badge-sick-fg); }
 
 /* Table */
 .table-wrapper {
@@ -350,8 +380,8 @@ body {
 }
 
 .timesheet-table th {
-  background: #1e3a5f;
-  color: white;
+  background: var(--th-bg);
+  color: var(--th-text);
   padding: 10px 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -365,7 +395,7 @@ body {
 }
 
 .timesheet-table tbody tr:hover {
-  background-color: rgba(30, 64, 175, 0.03);
+  background-color: var(--row-hover);
 }
 
 /* Row types */
@@ -404,14 +434,14 @@ tr.row-short {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
-  background: var(--color-surface);
+  background: var(--input-bg);
   font-family: inherit;
   color: inherit;
   outline: none;
 }
 .table-input:focus {
   border-color: var(--color-primary);
-  background: white;
+  background: var(--input-bg-focus);
 }
 
 .time-input {
@@ -465,7 +495,7 @@ tr.row-short {
 
 /* Totals Row */
 .totals-row td {
-  background: #edf2f8;
+  background: var(--totals-bg);
   border-top: 2px solid var(--color-border-dark);
   border-bottom: 2px solid var(--color-border-dark);
   font-size: 0.95rem;
@@ -488,7 +518,7 @@ tr.row-short {
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: var(--overlay);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -560,27 +590,7 @@ tr.row-short {
   background: var(--color-bg);
 }
 
-/* Responsive & Print */
-@media (max-width: 768px) {
-  body {
-    padding: 12px;
-  }
-  .app-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .toolbar-left, .toolbar-right {
-    justify-content: stretch;
-  }
-  .toolbar-left .btn, .toolbar-right .btn {
-    flex: 1;
-  }
-}
-
+/* Print: always light, no controls (dark tokens live inside @media screen) */
 @media print {
   body {
     background: white;
@@ -641,4 +651,318 @@ tr.row-today {
 tr.row-today .col-date::after {
   content: " •";
   color: var(--color-primary);
+}
+
+/* Header action buttons (theme / settings) */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Comfortable touch targets on any touch device */
+@media (pointer: coarse) {
+  .btn { min-height: 44px; }
+}
+
+/* =====================================================================
+   Dark theme
+   <html data-theme="dark"> is set by ThemeManager (auto/light/dark).
+   Wrapped in @media screen so that printing always uses the light tokens.
+   ===================================================================== */
+@media screen {
+  :root[data-theme="dark"] {
+    --color-primary: #60a5fa;
+    --color-primary-hover: #93c5fd;
+    --color-primary-light: #172554;
+
+    --color-bg: #0b1220;
+    --color-surface: #111a2e;
+    --color-border: #24324d;
+    --color-border-dark: #3a4b6e;
+
+    --color-text: #e6edf7;
+    --color-text-muted: #9aa8c0;
+    --color-text-light: #8190ad;
+
+    --color-success: #4ade80;
+    --color-success-bg: rgba(34, 197, 94, 0.16);
+    --color-danger: #f87171;
+    --color-danger-bg: rgba(239, 68, 68, 0.18);
+    --color-warning: #fbbf24;
+    --color-warning-bg: rgba(245, 158, 11, 0.16);
+    --color-info: #38bdf8;
+    --color-info-bg: rgba(14, 165, 233, 0.16);
+
+    --row-weekend-bg: rgba(148, 163, 184, 0.16);
+    --row-vacation-bg: rgba(34, 197, 94, 0.10);
+    --row-sick-bg: rgba(245, 158, 11, 0.10);
+    --row-holiday-bg: rgba(239, 68, 68, 0.12);
+    --row-short-bg: rgba(96, 165, 250, 0.10);
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+    --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 12px 24px -3px rgb(0 0 0 / 0.6), 0 4px 8px -4px rgb(0 0 0 / 0.5);
+
+    --btn-primary-bg: #2563eb;
+    --btn-primary-hover: #3b82f6;
+    --on-primary: #ffffff;
+    --input-bg: #0d1526;
+    --input-bg-focus: #0b1220;
+    --focus-ring: rgba(96, 165, 250, 0.35);
+    --row-hover: rgba(96, 165, 250, 0.06);
+    --th-bg: #1b2a4a;
+    --th-text: #e6edf7;
+    --totals-bg: #16223b;
+    --overlay: rgba(0, 0, 0, 0.65);
+
+    --badge-work-bg: #24324d;                --badge-work-fg: #cbd5e1;
+    --badge-short-bg: rgba(59, 130, 246, 0.22);   --badge-short-fg: #93c5fd;
+    --badge-weekend-bg: #17213a;             --badge-weekend-fg: #9aa8c0;   --badge-weekend-border: #3a4b6e;
+    --badge-holiday-bg: rgba(239, 68, 68, 0.22);  --badge-holiday-fg: #fca5a5;
+    --badge-vacation-bg: rgba(34, 197, 94, 0.22); --badge-vacation-fg: #86efac;
+    --badge-sick-bg: rgba(245, 158, 11, 0.22);    --badge-sick-fg: #fcd34d;
+
+    color-scheme: dark; /* native time/number pickers, scrollbars, <select> popups */
+  }
+
+  :root[data-theme="dark"] .table-input::placeholder { color: var(--color-text-light); }
+}
+
+/* =====================================================================
+   Mobile / tablet layout (<= 900px): table rows become cards
+   ===================================================================== */
+@media screen and (max-width: 900px) {
+  body {
+    padding: calc(12px + var(--safe-top)) calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
+  }
+
+  /* --- Header: brand + icon buttons on top, period controls below --- */
+  .app-header {
+    padding: 12px;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  .brand { order: 1; flex: 1; min-width: 0; }
+  .header-actions { order: 2; }
+  .period-controls { order: 3; width: 100%; }
+  .logo-icon { font-size: 26px; }
+  .brand h1 { font-size: 1.15rem; }
+  .brand .subtitle { display: none; }
+
+  .header-actions .btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    font-size: 1.15rem;
+  }
+  .btn-label { display: none; }
+
+  .period-controls {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 8px;
+  }
+  .period-selectors { min-width: 0; }
+  .period-selectors .form-select { flex: 1; min-width: 0; }
+  .period-controls .icon-btn { width: 44px; height: 44px; }
+  #today-btn { grid-column: 1 / -1; }
+
+  /* iOS zooms into inputs with font-size < 16px */
+  .form-select, .form-input, .table-input { font-size: 16px; min-height: 44px; }
+  .year-input { width: 84px; }
+
+  /* --- KPI: today's delta first and full-width, others 2x2 --- */
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .kpi-card { padding: 12px 14px; }
+  .kpi-card-today { grid-column: 1 / -1; order: -1; }
+  .kpi-title { font-size: 0.7rem; }
+  .kpi-icon { font-size: 1rem; }
+  .kpi-value { font-size: 1.35rem; }
+  .kpi-card-today .kpi-value { font-size: 2rem; }
+  .kpi-desc { font-size: 0.75rem; }
+
+  /* --- Toolbar --- */
+  .toolbar { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px; }
+  .toolbar-left, .toolbar-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .toolbar .btn { font-size: 0.85rem; padding: 8px 10px; min-height: 44px; }
+  #fill-defaults-btn { grid-column: 1 / -1; order: -1; }
+  .toolbar-left:has(#goto-today-btn[hidden]) #clear-month-btn { grid-column: 1 / -1; }
+
+  .day-types-legend { font-size: 0.72rem; gap: 6px; }
+
+  /* --- Timesheet: each day is a card --- */
+  .table-wrapper {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+    margin-bottom: 16px;
+  }
+  .timesheet-table,
+  .timesheet-table tbody,
+  .timesheet-table tfoot { display: block; width: 100%; }
+  .timesheet-table thead { display: none; }
+
+  /* :where() keeps specificity at 0 so .row-weekend / .row-sick tints still win */
+  :where(.timesheet-table tbody tr) { background-color: var(--color-surface); }
+
+  .timesheet-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 10px 8px;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .timesheet-table tbody td {
+    display: block;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    text-align: left;
+  }
+
+  /* Card header: date, weekday, day type, clear button */
+  .timesheet-table tbody td.col-num { display: none; } /* must out-rank 'tbody td {display:block}' */
+  td.col-date { grid-column: span 3; font-size: 1.05rem; font-weight: 700; }
+  td.col-day { grid-column: span 2; color: var(--color-text-muted); }
+  td.col-type { grid-column: span 5; }
+  td.col-actions { grid-row: 1; grid-column: 11 / 13; text-align: right; }
+  .type-select { text-align: left; }
+
+  /* Inputs and results: three equal columns */
+  td.cell-start, td.cell-end, td.cell-lunch,
+  td.cell-fact, td.cell-plan, td.cell-delta { grid-column: span 4; }
+  td.col-notes { grid-column: 1 / -1; }
+
+  td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+  }
+
+  .time-input, .lunch-input { max-width: none; width: 100%; }
+  .time-input { padding-left: 6px; padding-right: 6px; }
+  .time-input::-webkit-calendar-picker-indicator { display: none; }
+
+  td.cell-fact, td.cell-plan, td.cell-delta {
+    font-size: 1.05rem;
+    text-align: left;
+    padding-top: 2px;
+  }
+
+  .row-clear-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  /* Today: the outline from the base rule stays; drop the table-only side bar */
+  tr.row-today td:first-child { box-shadow: none; }
+  tr.row-today { border-color: var(--color-primary); }
+
+  /* --- Totals card --- */
+  .timesheet-table tfoot tr.totals-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 12px;
+    background: var(--totals-bg);
+    border: 2px solid var(--color-border-dark);
+    border-radius: var(--radius-lg);
+  }
+  .timesheet-table tfoot .totals-row td {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+  }
+  .totals-row .totals-title { grid-column: 1 / -1; }
+  .totals-row .totals-spacer { display: none; }
+
+  /* --- Settings modal becomes a bottom sheet --- */
+  .modal-overlay { align-items: flex-end; }
+  .modal {
+    width: 100%;
+    max-width: none;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: sheetUp 0.22s ease-out;
+  }
+  .modal-body { overflow-y: auto; }
+  .modal-close { width: 44px; height: 44px; }
+  .modal-footer { padding-bottom: calc(14px + var(--safe-bottom)); }
+  .modal-footer .btn { width: 100%; min-height: 48px; }
+
+  .app-footer { padding-bottom: 8px; }
+}
+
+@keyframes sheetUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* No hover lift on touch screens (it sticks after a tap) */
+@media (hover: none) {
+  .kpi-card:hover { transform: none; box-shadow: var(--shadow-sm); }
+}
+
+/* Tablet portrait: two columns of cards instead of one very wide column */
+@media screen and (min-width: 600px) and (max-width: 900px) {
+  .timesheet-table tbody {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .timesheet-table tbody tr { margin-bottom: 0; }
+  .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Narrow desktop / tablet landscape: the table keeps its layout (it scrolls inside
+   its own container), but five KPI cards must still fit one row */
+@media screen and (min-width: 901px) and (max-width: 1140px) {
+  .kpi-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+  .kpi-card { padding: 14px; }
+  .kpi-value { font-size: 1.45rem; }
+}
+
+/* Very narrow phones (iPhone SE / small Android) */
+@media (max-width: 380px) {
+  body { padding-left: calc(8px + var(--safe-left)); padding-right: calc(8px + var(--safe-right)); }
+  .kpi-grid { gap: 8px; }
+  .kpi-value { font-size: 1.2rem; }
+  .kpi-card-today .kpi-value { font-size: 1.7rem; }
+  .toolbar .btn { font-size: 0.8rem; padding: 8px 6px; }
+  .timesheet-table tbody tr { padding: 10px; }
+}
+
+/* Respect the OS "reduce motion" setting */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

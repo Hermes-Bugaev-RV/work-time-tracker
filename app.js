@@ -26,6 +26,80 @@ const DEFAULT_SETTINGS = {
   defaultLunch: 1.0
 };
 
+/**
+ * Theme handling: mode is "auto" (follow the OS), "light" or "dark".
+ * The effective theme is always written to <html data-theme="light|dark">,
+ * so CSS only needs one dark selector. The inline script in <head> applies
+ * the saved mode before first paint; this class takes over afterwards.
+ */
+const THEME_STORAGE_KEY = "worktime_tracker_theme";
+const THEME_MODES = ["auto", "light", "dark"];
+const THEME_META = {
+  auto:  { icon: "🌗", label: "Авто" },
+  light: { icon: "☀️", label: "Светлая" },
+  dark:  { icon: "🌙", label: "Тёмная" }
+};
+const THEME_COLORS = { light: "#f8fafc", dark: "#0b1220" };
+
+class ThemeManager {
+  constructor() {
+    this.root = document.documentElement;
+    this.btn = document.getElementById("theme-btn");
+    this.icon = document.getElementById("theme-icon");
+    this.label = document.getElementById("theme-label");
+    this.mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+    this.mode = this.readMode();
+    this.apply();
+
+    this.btn.addEventListener("click", () => this.cycle());
+    // In "auto" mode follow OS theme changes live (e.g. sunset schedule)
+    const onSystemChange = () => { if (this.mode === "auto") this.apply(); };
+    if (this.mq.addEventListener) this.mq.addEventListener("change", onSystemChange);
+    else if (this.mq.addListener) this.mq.addListener(onSystemChange);
+  }
+
+  readMode() {
+    try {
+      const m = localStorage.getItem(THEME_STORAGE_KEY);
+      return THEME_MODES.includes(m) ? m : "auto";
+    } catch (e) {
+      return "auto";
+    }
+  }
+
+  effectiveTheme() {
+    if (this.mode === "auto") return this.mq.matches ? "dark" : "light";
+    return this.mode;
+  }
+
+  cycle() {
+    this.mode = THEME_MODES[(THEME_MODES.indexOf(this.mode) + 1) % THEME_MODES.length];
+    try { localStorage.setItem(THEME_STORAGE_KEY, this.mode); } catch (e) { /* private mode */ }
+    this.apply();
+  }
+
+  apply() {
+    const theme = this.effectiveTheme();
+    this.root.setAttribute("data-theme", theme);
+    this.root.setAttribute("data-theme-mode", this.mode);
+
+    const meta = THEME_META[this.mode];
+    this.icon.textContent = meta.icon;
+    this.label.textContent = meta.label;
+    this.btn.setAttribute("aria-label", `Тема оформления: ${meta.label.toLowerCase()}. Нажмите, чтобы переключить`);
+    this.btn.title = `Тема: ${meta.label}`;
+
+    // Browser UI colour (Android address bar etc.): a manual choice must
+    // override the media-specific tags, so replace them with a single one.
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.remove());
+    const tc = document.createElement("meta");
+    tc.name = "theme-color";
+    tc.content = THEME_COLORS[theme];
+    document.head.appendChild(tc);
+  }
+}
+
 class WorkTimeTracker {
   constructor() {
     this.currentDate = new Date();
@@ -163,6 +237,11 @@ class WorkTimeTracker {
     });
 
     // Toolbar actions
+    this.gotoTodayBtn = document.getElementById("goto-today-btn");
+    this.gotoTodayBtn.addEventListener("click", () => {
+      const row = document.getElementById("row-today");
+      if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
     document.getElementById("fill-defaults-btn").addEventListener("click", () => this.fillDefaults());
     document.getElementById("clear-month-btn").addEventListener("click", () => this.clearMonth());
     document.getElementById("export-csv-btn").addEventListener("click", () => this.exportCSV());
@@ -299,18 +378,18 @@ class WorkTimeTracker {
             `).join("")}
           </select>
         </td>
-        <td class="col-time">
-          <input type="time" class="table-input time-input" data-day="${day}" data-field="start" value="${record.start || ""}">
+        <td class="col-time cell-start" data-label="Начало">
+          <input type="time" class="table-input time-input" aria-label="Начало, ${dateFormatted}" data-day="${day}" data-field="start" value="${record.start || ""}">
         </td>
-        <td class="col-time">
-          <input type="time" class="table-input time-input" data-day="${day}" data-field="end" value="${record.end || ""}">
+        <td class="col-time cell-end" data-label="Конец">
+          <input type="time" class="table-input time-input" aria-label="Конец, ${dateFormatted}" data-day="${day}" data-field="end" value="${record.end || ""}">
         </td>
-        <td class="col-lunch">
-          <input type="number" class="table-input lunch-input" data-day="${day}" data-field="lunch" min="0" max="6" step="0.25" value="${record.lunch !== undefined ? record.lunch : ""}">
+        <td class="col-lunch cell-lunch" data-label="Обед, ч">
+          <input type="number" inputmode="decimal" class="table-input lunch-input" aria-label="Обед, ${dateFormatted}" data-day="${day}" data-field="lunch" min="0" max="6" step="0.25" value="${record.lunch !== undefined ? record.lunch : ""}">
         </td>
-        <td class="col-hours text-right">${factHours > 0 ? factHours.toFixed(2) : "-"}</td>
-        <td class="col-hours text-right">${planHours > 0 ? planHours.toFixed(2) : "-"}</td>
-        <td class="col-delta text-right">
+        <td class="col-hours cell-fact text-right" data-label="Факт, ч">${factHours > 0 ? factHours.toFixed(2) : "-"}</td>
+        <td class="col-hours cell-plan text-right" data-label="План, ч">${planHours > 0 ? planHours.toFixed(2) : "-"}</td>
+        <td class="col-delta cell-delta text-right" data-label="Дельта, ч">
           <span class="delta-tag ${deltaClass}">${deltaSign}${deltaHours.toFixed(2)}</span>
         </td>
         <td class="col-notes">
@@ -327,6 +406,9 @@ class WorkTimeTracker {
     this.updateKPIs(totalPlan, totalFact, plannedDaysCount, workedDaysCount);
     this.updateTodayDelta(monthData);
     this.bindTableInputs();
+
+    // "Go to today" only makes sense while the current month is shown
+    this.gotoTodayBtn.hidden = !document.getElementById("row-today");
   }
 
   isToday(year, month, day) {
@@ -702,5 +784,6 @@ class WorkTimeTracker {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  window.theme = new ThemeManager();
   window.tracker = new WorkTimeTracker();
 });
