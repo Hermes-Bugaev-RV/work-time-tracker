@@ -601,3 +601,44 @@ tr.row-short {
     background: transparent;
   }
 }
+
+/* Today highlight & cumulative delta */
+.kpi-card-today {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary) inset;
+}
+
+.kpi-desc-secondary {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: var(--color-text-light);
+}
+
+.kpi-live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: var(--color-success);
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+tr.row-today td:first-child {
+  box-shadow: inset 4px 0 0 var(--color-primary);
+}
+
+tr.row-today {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+tr.row-today .col-date::after {
+  content: " •";
+  color: var(--color-primary);
+}

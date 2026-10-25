@@ -38,6 +38,9 @@ class WorkTimeTracker {
     this.initDOM();
     this.bindEvents();
     this.render();
+
+    // Refresh the "today" card every 30s so an open shift ticks up live
+    setInterval(() => this.updateTodayDelta(), 30000);
   }
 
   loadSettings() {
@@ -111,6 +114,11 @@ class WorkTimeTracker {
     this.kpiProgressPct = document.getElementById("kpi-progress-pct");
     this.kpiProgressBar = document.getElementById("kpi-progress-bar");
     
+    // "Delta as of today" card
+    this.kpiTodayDelta = document.getElementById("kpi-today-delta");
+    this.kpiTodayStatus = document.getElementById("kpi-today-status");
+    this.kpiTodayDetail = document.getElementById("kpi-today-detail");
+
     // Totals
     this.totalFact = document.getElementById("total-fact");
     this.totalPlan = document.getElementById("total-plan");
@@ -271,6 +279,11 @@ class WorkTimeTracker {
         tr.className = "row-weekend";
       }
 
+      if (this.isToday(this.currentYear, this.currentMonth, day)) {
+        tr.classList.add("row-today");
+        tr.id = "row-today";
+      }
+
       const dateFormatted = `${String(day).padStart(2, "0")}.${String(this.currentMonth).padStart(2, "0")}`;
       const deltaSign = deltaHours > 0 ? "+" : "";
       const deltaClass = deltaHours > 0 ? "positive" : (deltaHours < 0 ? "negative" : "zero");
@@ -312,7 +325,129 @@ class WorkTimeTracker {
     }
 
     this.updateKPIs(totalPlan, totalFact, plannedDaysCount, workedDaysCount);
+    this.updateTodayDelta(monthData);
     this.bindTableInputs();
+  }
+
+  isToday(year, month, day) {
+    const now = new Date();
+    return now.getFullYear() === year && now.getMonth() + 1 === month && now.getDate() === day;
+  }
+
+  /** Default (empty) record for a day, same as used when rendering. */
+  getDefaultRecord(year, month, day) {
+    const dow = new Date(year, month - 1, day).getDay();
+    const isWeekend = dow === 0 || dow === 6;
+    return {
+      type: isWeekend ? "В" : "Р",
+      start: "",
+      end: "",
+      lunch: isWeekend ? 0 : this.settings.defaultLunch,
+      notes: ""
+    };
+  }
+
+  /**
+   * Cumulative balance "as of today".
+   *
+   * Rules:
+   *  - viewed month is in the future  -> nothing to compare yet;
+   *  - viewed month is in the past    -> whole month (equals monthly balance);
+   *  - viewed month is the current one -> days 1..today:
+   *      * past days count fully (plan vs fact);
+   *      * today with start but no end is "live": end = current time;
+   *      * today with no start yet is NOT counted in plan
+   *        (otherwise the morning balance would always be -8h).
+   */
+  computeTodayStats(monthData = this.getMonthData()) {
+    const now = new Date();
+    const nowIdx = now.getFullYear() * 12 + now.getMonth();
+    const viewIdx = this.currentYear * 12 + (this.currentMonth - 1);
+
+    if (viewIdx > nowIdx) return { state: "future" };
+
+    const daysInMonth = this.getDaysInMonth(this.currentYear, this.currentMonth);
+    const isCurrent = viewIdx === nowIdx;
+    const lastDay = isCurrent ? now.getDate() : daysInMonth;
+    const nowStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+    let plan = 0;
+    let fact = 0;
+    let live = false;
+    let today = null;
+
+    for (let day = 1; day <= lastDay; day++) {
+      const rec = monthData[day] || this.getDefaultRecord(this.currentYear, this.currentMonth, day);
+      const dayPlan = (DAY_TYPES[rec.type] || DAY_TYPES["Р"]).norm;
+      const isTodayRow = isCurrent && day === lastDay;
+
+      if (isTodayRow) {
+        const started = !!rec.start;
+        const ended = !!rec.end;
+        let dayFact;
+        if (started && !ended) {
+          live = true;
+          dayFact = this.calcFactHours(rec.start, nowStr, rec.lunch);
+        } else {
+          dayFact = this.calcFactHours(rec.start, rec.end, rec.lunch);
+        }
+        const counted = started || dayFact > 0 || dayPlan === 0;
+        today = { plan: dayPlan, fact: dayFact, started, ended, counted };
+        if (counted) plan += dayPlan;
+        fact += dayFact;
+      } else {
+        plan += dayPlan;
+        fact += this.calcFactHours(rec.start, rec.end, rec.lunch);
+      }
+    }
+
+    plan = Math.round(plan * 100) / 100;
+    fact = Math.round(fact * 100) / 100;
+    return {
+      state: isCurrent ? "current" : "past",
+      plan, fact,
+      delta: Math.round((fact - plan) * 100) / 100,
+      live, today
+    };
+  }
+
+  updateTodayDelta(monthData) {
+    const s = this.computeTodayStats(monthData);
+    const fmt = (v) => (v > 0 ? "+" : "") + v.toFixed(2);
+
+    if (s.state === "future") {
+      this.kpiTodayDelta.textContent = "—";
+      this.kpiTodayDelta.className = "";
+      this.kpiTodayStatus.textContent = "Месяц ещё не начался";
+      this.kpiTodayDetail.textContent = "";
+      return;
+    }
+
+    this.kpiTodayDelta.textContent = fmt(s.delta);
+    this.kpiTodayDelta.className = s.delta > 0 ? "delta-plus" : (s.delta < 0 ? "delta-minus" : "");
+
+    const liveDot = s.live ? '<span class="kpi-live-dot"></span>' : "";
+    const word = s.delta > 0 ? "Опережение" : (s.delta < 0 ? "Отставание" : "Идёшь строго по плану");
+    const scope = s.state === "current" ? "на сегодня" : "за весь месяц";
+    this.kpiTodayStatus.innerHTML = `${liveDot}${word} ${scope}`;
+
+    const parts = [`Факт ${s.fact.toFixed(2)} ч из ${s.plan.toFixed(2)} ч`];
+    if (s.today) {
+      const t = s.today;
+      if (t.plan > 0) {
+        if (!t.started) {
+          parts.push(`сегодня не начато (норма ${t.plan.toFixed(2)} ч)`);
+        } else {
+          const left = Math.round((t.plan - t.fact) * 100) / 100;
+          parts.push(left > 0
+            ? `сегодня ещё ${left.toFixed(2)} ч до нормы`
+            : `сегодня норма выполнена (${fmt(-left)} ч)`);
+        }
+      } else {
+        parts.push("сегодня нерабочий день");
+      }
+    }
+    this.kpiTodayDetail.textContent = parts.join(" • ");
   }
 
   bindTableInputs() {
