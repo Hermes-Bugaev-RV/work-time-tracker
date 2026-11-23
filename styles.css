@@ -50,6 +50,15 @@
   --th-text: #ffffff;
   --totals-bg: #edf2f8;
   --overlay: rgba(15, 23, 42, 0.45);
+  --surface-subtle: #f8fafc;
+  --surface-hover: #f1f5f9;
+  --highlight-bg: #fef08a;
+  --highlight-fg: #0f172a;
+  --pill-task-bg: #dbeafe;
+  --pill-task-fg: #1e40af;
+  --pill-note-bg: #e2e8f0;
+  --pill-note-fg: #334155;
+  --drawer-shadow: -8px 0 28px rgba(15, 23, 42, 0.16);
 
   --badge-work-bg: #e2e8f0;      --badge-work-fg: #334155;
   --badge-short-bg: #dbeafe;     --badge-short-fg: #1e40af;
@@ -425,7 +434,7 @@ tr.row-short {
 .col-lunch { width: 90px; text-align: center; }
 .col-hours { width: 90px; text-align: right; font-family: var(--font-mono); font-weight: 600; }
 .col-delta { width: 95px; text-align: right; font-family: var(--font-mono); font-weight: 700; }
-.col-notes { min-width: 220px; }
+.col-notes { min-width: 240px; max-width: 340px; }
 .col-actions { width: 45px; text-align: center; }
 
 .table-input {
@@ -590,25 +599,786 @@ tr.row-short {
   background: var(--color-bg);
 }
 
+/* =====================================================================
+   Переключатель вкладок (Табель / Журнал задач и заметок)
+   ===================================================================== */
+.view-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+}
+
+.view-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.view-tab:hover {
+  color: var(--color-text);
+  background: var(--surface-hover);
+}
+
+.view-tab.is-active {
+  background: var(--btn-primary-bg);
+  color: var(--on-primary);
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: var(--surface-hover);
+  color: var(--color-text-muted);
+}
+
+.view-tab.is-active .tab-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: var(--on-primary);
+}
+
+/* =====================================================================
+   Кнопка-превью задач и заметок в строке таблицы / карточке дня
+   ===================================================================== */
+.notes-trigger {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.notes-trigger:hover {
+  border-color: var(--color-primary);
+  background: var(--surface-subtle);
+}
+
+.notes-trigger:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.notes-trigger.is-empty {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  border-style: dashed;
+  border-color: var(--color-border-dark);
+  color: var(--color-text-muted);
+}
+
+.notes-trigger-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+}
+
+.note-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.note-pill-tasks {
+  background: var(--pill-task-bg);
+  color: var(--pill-task-fg);
+}
+
+.note-pill-tasks.is-all-done {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.note-pill-note {
+  background: var(--pill-note-bg);
+  color: var(--pill-note-fg);
+}
+
+.notes-trigger-preview {
+  width: 100%;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* Полная версия задач и заметки показывается только при печати */
+.print-notes-detail {
+  display: none;
+}
+
+/* =====================================================================
+   Выдвижная панель дня (сбоку на ПК, нижняя шторка на мобильном)
+   ===================================================================== */
+body.drawer-open {
+  overflow: hidden;
+}
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  backdrop-filter: blur(2px);
+  z-index: 1100;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
+.day-drawer {
+  width: min(480px, 94vw);
+  height: 100%;
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  box-shadow: var(--drawer-shadow);
+  display: flex;
+  flex-direction: column;
+  animation: drawerSlideIn 0.2s ease-out;
+}
+
+@keyframes drawerSlideIn {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.drawer-handle {
+  display: none;
+  justify-content: center;
+  padding: 10px 0 4px;
+  flex-shrink: 0;
+}
+
+.drawer-handle span {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-border-dark);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.drawer-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.drawer-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.drawer-title-group h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.25;
+}
+
+.drawer-meta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 10px 18px;
+  background: var(--surface-subtle);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.drawer-meta-bar strong {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  overscroll-behavior: contain;
+}
+
+.drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drawer-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.drawer-section-header h3,
+.section-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.drawer-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-counter {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.drawer-tasks-progress {
+  width: 100%;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.drawer-tasks-progress-fill {
+  height: 100%;
+  background: var(--color-success);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.task-add-form {
+  display: flex;
+  gap: 8px;
+}
+
+.task-add-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-add-btn {
+  width: 42px;
+  padding: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s ease;
+}
+
+.task-item:hover {
+  border-color: var(--color-border-dark);
+}
+
+.task-check-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.task-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--color-text);
+  word-break: break-word;
+  padding: 1px 4px;
+  border-radius: 4px;
+  cursor: text;
+}
+
+.task-text:hover {
+  background: var(--surface-hover);
+}
+
+.task-item.is-done .task-text {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.task-edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+}
+
+.task-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-light);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-delete-btn:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+
+.task-empty-hint {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  padding: 10px 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.save-status {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.save-status.is-saved {
+  color: var(--color-success);
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--input-bg);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-textarea:focus {
+  border-color: var(--color-primary);
+  background: var(--input-bg-focus);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.drawer-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+  flex-shrink: 0;
+}
+
+/* =====================================================================
+   Журнал задач и заметок за месяц
+   ===================================================================== */
+.journal-view {
+  margin-bottom: 24px;
+}
+
+.journal-controls {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journal-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.journal-search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 0.95rem;
+  pointer-events: none;
+  color: var(--color-text-muted);
+}
+
+.journal-search-input {
+  width: 100%;
+  padding-left: 36px;
+  padding-right: 36px;
+}
+
+.journal-search-clear {
+  position: absolute;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.journal-search-clear:hover {
+  background: var(--surface-hover);
+  color: var(--color-text);
+}
+
+.journal-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.journal-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--surface-subtle);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--color-border-dark);
+  color: var(--color-text);
+}
+
+.filter-chip.is-active {
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+  color: var(--on-primary);
+}
+
+.journal-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.journal-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 12px;
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+}
+
+.journal-summary strong {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+}
+
+.journal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journal-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journal-card.is-today {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary) inset;
+}
+
+.journal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.journal-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.journal-card-date {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+}
+
+.journal-card-hours {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.journal-card-tasks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.journal-task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.journal-task-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.journal-task-row.is-done .journal-task-label {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.journal-task-label {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+  cursor: pointer;
+}
+
+.journal-card-note {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+}
+
+.journal-highlight {
+  background: var(--highlight-bg);
+  color: var(--highlight-fg);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.journal-empty {
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-dark);
+  border-radius: var(--radius-lg);
+  padding: 36px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-muted);
+}
+
+.journal-empty-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.journal-empty h3 {
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.journal-empty p {
+  font-size: 0.88rem;
+  max-width: 420px;
+}
+
 /* Print: always light, no controls (dark tokens live inside @media screen) */
 @media print {
   body {
     background: white;
     padding: 0;
   }
-  .period-controls, .header-actions, .toolbar, .day-types-legend, .col-actions, .app-footer, .row-clear-btn {
+  .period-controls,
+  .header-actions,
+  .toolbar,
+  .view-tabs,
+  .day-types-legend,
+  .col-actions,
+  .app-footer,
+  .row-clear-btn,
+  .notes-trigger,
+  .drawer-overlay,
+  .journal-controls,
+  .journal-edit-btn {
     display: none !important;
   }
   .app-container {
     max-width: 100%;
   }
-  .app-header, .table-wrapper, .kpi-card {
+  .app-header, .table-wrapper, .kpi-card, .journal-card {
     box-shadow: none;
     border-color: #999;
   }
   .table-input {
     border: none;
     background: transparent;
+  }
+  .print-notes-detail {
+    display: block;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 }
 
@@ -715,6 +1485,15 @@ tr.row-today .col-date::after {
     --th-text: #e6edf7;
     --totals-bg: #16223b;
     --overlay: rgba(0, 0, 0, 0.65);
+    --surface-subtle: #162238;
+    --surface-hover: #1c2b47;
+    --highlight-bg: rgba(250, 204, 21, 0.28);
+    --highlight-fg: #fef08a;
+    --pill-task-bg: rgba(59, 130, 246, 0.22);
+    --pill-task-fg: #93c5fd;
+    --pill-note-bg: #1f2e4d;
+    --pill-note-fg: #cbd5e1;
+    --drawer-shadow: -8px 0 32px rgba(0, 0, 0, 0.55);
 
     --badge-work-bg: #24324d;                --badge-work-fg: #cbd5e1;
     --badge-short-bg: rgba(59, 130, 246, 0.22);   --badge-short-fg: #93c5fd;
@@ -848,7 +1627,83 @@ tr.row-today .col-date::after {
   /* Inputs and results: three equal columns */
   td.cell-start, td.cell-end, td.cell-lunch,
   td.cell-fact, td.cell-plan, td.cell-delta { grid-column: span 4; }
-  td.col-notes { grid-column: 1 / -1; }
+  td.col-notes { grid-column: 1 / -1; min-width: 0; max-width: none; }
+
+  .notes-trigger {
+    min-height: 44px;
+    padding: 9px 11px;
+    font-size: 0.9rem;
+  }
+  .notes-trigger-preview {
+    font-size: 0.85rem;
+  }
+
+  /* --- Вкладки режимов на мобильном --- */
+  .view-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  .view-tab {
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  /* --- Выдвижная панель дня превращается в нижнюю шторку --- */
+  .drawer-overlay {
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .day-drawer {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: sheetUp 0.22s ease-out;
+  }
+  .drawer-handle { display: flex; }
+  .drawer-header { padding: 8px 14px 12px; }
+  .drawer-nav .icon-btn { width: 44px; height: 44px; flex-shrink: 0; }
+  .drawer-title-group h2 { font-size: 0.98rem; }
+  .drawer-meta-bar { padding: 8px 14px; font-size: 0.8rem; }
+  .drawer-body { padding: 14px; gap: 18px; }
+  .form-textarea, .task-add-input, .task-edit-input, .journal-search-input {
+    font-size: 16px;
+  }
+  .form-textarea { min-height: 140px; }
+  .task-add-btn { width: 44px; height: 44px; }
+  .task-check-wrap {
+    min-width: 36px;
+    min-height: 36px;
+    padding-top: 0;
+    margin: -6px 0 -6px -4px;
+  }
+  .task-checkbox { width: 22px; height: 22px; }
+  .task-delete-btn { width: 38px; height: 38px; }
+  .drawer-footer {
+    padding: 12px 14px calc(12px + var(--safe-bottom));
+  }
+  .drawer-footer .btn { min-height: 44px; }
+
+  /* --- Журнал задач на мобильном --- */
+  .journal-controls { padding: 12px; gap: 10px; }
+  .journal-controls-row { flex-direction: column; align-items: stretch; }
+  .filter-chip { min-height: 36px; padding: 6px 11px; }
+  .journal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .journal-actions .btn { min-height: 44px; width: 100%; }
+  .journal-search-clear { width: 38px; height: 38px; }
+  .journal-card { padding: 12px 14px; }
+  .journal-edit-btn { min-height: 38px; }
 
   td[data-label]::before {
     content: attr(data-label);
@@ -960,6 +1815,9 @@ tr.row-today .col-date::after {
   .kpi-card-today .kpi-value { font-size: 1.7rem; }
   .toolbar .btn { font-size: 0.8rem; padding: 8px 6px; }
   .timesheet-table tbody tr { padding: 10px; }
+  .view-tab { font-size: 0.78rem; padding: 8px 6px; gap: 4px; }
+  .journal-actions .btn { font-size: 0.78rem; padding: 8px 6px; }
+  .drawer-footer .btn { font-size: 0.82rem; padding: 8px 10px; }
 }
 
 /* Respect the OS "reduce motion" setting */

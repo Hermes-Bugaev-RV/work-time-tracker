@@ -139,50 +139,96 @@
       </div>
     </section>
 
-    <!-- Legend of Day Types -->
-    <div class="day-types-legend">
-      <span class="legend-title">Типы дней:</span>
-      <span class="badge badge-work">Р — Рабочий (8ч)</span>
-      <span class="badge badge-short">ПР — Предпраздничный (7ч)</span>
-      <span class="badge badge-weekend">В — Выходной (0ч)</span>
-      <span class="badge badge-holiday">П — Праздник (0ч)</span>
-      <span class="badge badge-vacation">О — Отпуск (0ч)</span>
-      <span class="badge badge-sick">Б — Больничный (0ч)</span>
+    <!-- Переключатель режимов: табель / журнал задач за месяц -->
+    <nav class="view-tabs" role="tablist" aria-label="Режим просмотра">
+      <button type="button" id="tab-timesheet-btn" class="view-tab is-active" role="tab" aria-selected="true" aria-controls="timesheet-view">
+        <span aria-hidden="true">📅</span> Табель
+      </button>
+      <button type="button" id="tab-journal-btn" class="view-tab" role="tab" aria-selected="false" aria-controls="journal-view">
+        <span aria-hidden="true">📝</span> Задачи и заметки
+        <span class="tab-badge" id="journal-tab-badge">0</span>
+      </button>
+    </nav>
+
+    <!-- Режим табеля -->
+    <div id="timesheet-view" role="tabpanel" aria-labelledby="tab-timesheet-btn">
+      <!-- Legend of Day Types -->
+      <div class="day-types-legend">
+        <span class="legend-title">Типы дней:</span>
+        <span class="badge badge-work">Р — Рабочий (8ч)</span>
+        <span class="badge badge-short">ПР — Предпраздничный (7ч)</span>
+        <span class="badge badge-weekend">В — Выходной (0ч)</span>
+        <span class="badge badge-holiday">П — Праздник (0ч)</span>
+        <span class="badge badge-vacation">О — Отпуск (0ч)</span>
+        <span class="badge badge-sick">Б — Больничный (0ч)</span>
+      </div>
+
+      <!-- Timesheet Table -->
+      <main class="table-wrapper">
+        <table class="timesheet-table" id="timesheet-table">
+          <thead>
+            <tr>
+              <th class="col-num">№</th>
+              <th class="col-date">Дата</th>
+              <th class="col-day">День</th>
+              <th class="col-type">Тип дня</th>
+              <th class="col-time">Начало</th>
+              <th class="col-time">Конец</th>
+              <th class="col-lunch">Обед, ч</th>
+              <th class="col-hours">Факт, ч</th>
+              <th class="col-hours">План, ч</th>
+              <th class="col-delta">Дельта, ч</th>
+              <th class="col-notes">Задачи и заметки</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="timesheet-tbody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+          <tfoot>
+            <tr class="totals-row">
+              <td colspan="7" class="text-right totals-title"><strong>ИТОГО ЗА МЕСЯЦ:</strong></td>
+              <td class="text-right" data-label="Факт"><strong id="total-fact">0.00 ч</strong></td>
+              <td class="text-right" data-label="План"><strong id="total-plan">0.00 ч</strong></td>
+              <td class="text-right" data-label="Дельта"><strong id="total-delta">+0.00 ч</strong></td>
+              <td colspan="2" class="totals-spacer"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </main>
     </div>
 
-    <!-- Timesheet Table -->
-    <main class="table-wrapper">
-      <table class="timesheet-table" id="timesheet-table">
-        <thead>
-          <tr>
-            <th class="col-num">№</th>
-            <th class="col-date">Дата</th>
-            <th class="col-day">День</th>
-            <th class="col-type">Тип дня</th>
-            <th class="col-time">Начало</th>
-            <th class="col-time">Конец</th>
-            <th class="col-lunch">Обед, ч</th>
-            <th class="col-hours">Факт, ч</th>
-            <th class="col-hours">План, ч</th>
-            <th class="col-delta">Дельта, ч</th>
-            <th class="col-notes">Примечания / Задачи</th>
-            <th class="col-actions"></th>
-          </tr>
-        </thead>
-        <tbody id="timesheet-tbody">
-          <!-- Dynamically populated rows -->
-        </tbody>
-        <tfoot>
-          <tr class="totals-row">
-            <td colspan="7" class="text-right totals-title"><strong>ИТОГО ЗА МЕСЯЦ:</strong></td>
-            <td class="text-right" data-label="Факт"><strong id="total-fact">0.00 ч</strong></td>
-            <td class="text-right" data-label="План"><strong id="total-plan">0.00 ч</strong></td>
-            <td class="text-right" data-label="Дельта"><strong id="total-delta">+0.00 ч</strong></td>
-            <td colspan="2" class="totals-spacer"></td>
-          </tr>
-        </tfoot>
-      </table>
-    </main>
+    <!-- Сводный журнал задач и заметок за выбранный месяц -->
+    <section id="journal-view" class="journal-view" role="tabpanel" aria-labelledby="tab-journal-btn" hidden>
+      <div class="journal-controls">
+        <div class="journal-search-wrap">
+          <span class="journal-search-icon" aria-hidden="true">🔍</span>
+          <input type="search" id="journal-search-input" class="form-input journal-search-input" placeholder="Поиск по задачам, заметкам или дате..." aria-label="Поиск по задачам и заметкам">
+          <button type="button" id="journal-search-clear" class="journal-search-clear" title="Очистить поиск" aria-label="Очистить поиск" hidden>&times;</button>
+        </div>
+
+        <div class="journal-controls-row">
+          <div class="journal-filters" role="group" aria-label="Фильтр записей">
+            <button type="button" class="filter-chip is-active" data-filter="all">Все записи</button>
+            <button type="button" class="filter-chip" data-filter="open">В работе</button>
+            <button type="button" class="filter-chip" data-filter="done">Выполнено</button>
+            <button type="button" class="filter-chip" data-filter="notes">С заметками</button>
+          </div>
+
+          <div class="journal-actions">
+            <button type="button" id="journal-sort-btn" class="btn btn-secondary btn-sm" title="Порядок дней">
+              ↑ Сначала старые
+            </button>
+            <button type="button" id="journal-copy-btn" class="btn btn-secondary btn-sm" title="Скопировать отфильтрованную сводку в буфер обмена">
+              📋 Копировать сводку
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="journal-summary" id="journal-summary"></div>
+      <div class="journal-list" id="journal-list"></div>
+    </section>
 
     <!-- Footer -->
     <footer class="app-footer">
@@ -223,6 +269,66 @@
         <button id="settings-save-btn" class="btn btn-primary">Сохранить</button>
       </div>
     </div>
+  </div>
+
+  <!-- Выдвижная панель дня: сбоку на ПК, шторка снизу на мобильном -->
+  <div class="drawer-overlay" id="day-drawer-overlay" hidden>
+    <aside class="day-drawer" id="day-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-date-title">
+      <div class="drawer-handle" aria-hidden="true"><span></span></div>
+
+      <div class="drawer-header">
+        <div class="drawer-nav">
+          <button type="button" id="drawer-prev-day-btn" class="btn btn-secondary icon-btn" title="Предыдущий день (Alt+←)" aria-label="Предыдущий день">‹</button>
+          <div class="drawer-title-group">
+            <h2 id="drawer-date-title">День</h2>
+            <span id="drawer-day-badge" class="badge badge-work">Р</span>
+          </div>
+          <button type="button" id="drawer-next-day-btn" class="btn btn-secondary icon-btn" title="Следующий день (Alt+→)" aria-label="Следующий день">›</button>
+        </div>
+        <button type="button" class="modal-close" id="drawer-close-btn" title="Закрыть (Esc)" aria-label="Закрыть панель дня">&times;</button>
+      </div>
+
+      <div class="drawer-meta-bar" id="drawer-meta-bar"></div>
+
+      <div class="drawer-body">
+        <!-- Список задач за день -->
+        <section class="drawer-section" aria-labelledby="drawer-tasks-heading">
+          <div class="drawer-section-header">
+            <h3 id="drawer-tasks-heading">Задачи за день</h3>
+            <div class="drawer-section-actions">
+              <span id="drawer-tasks-counter" class="section-counter"></span>
+              <button type="button" id="drawer-toggle-all-btn" class="btn-link" hidden>Отметить все</button>
+            </div>
+          </div>
+
+          <div class="drawer-tasks-progress" id="drawer-tasks-progress" hidden>
+            <div class="drawer-tasks-progress-fill" id="drawer-tasks-progress-fill" style="width: 0%;"></div>
+          </div>
+
+          <form class="task-add-form" id="drawer-task-form">
+            <input type="text" id="drawer-task-input" class="form-input task-add-input" placeholder="Добавить задачу... (Enter)" autocomplete="off">
+            <button type="submit" class="btn btn-primary task-add-btn" title="Добавить задачу" aria-label="Добавить задачу">+</button>
+          </form>
+
+          <ul class="task-list" id="drawer-task-list"></ul>
+          <p class="task-empty-hint" id="drawer-task-empty">Задач пока нет — добавьте первую выше.</p>
+        </section>
+
+        <!-- Свободная многострочная заметка -->
+        <section class="drawer-section drawer-notes-section">
+          <div class="drawer-section-header">
+            <label for="drawer-notes-textarea" class="section-label">Заметка за день</label>
+            <span id="drawer-save-status" class="save-status" aria-live="polite"></span>
+          </div>
+          <textarea id="drawer-notes-textarea" class="form-textarea" rows="7" placeholder="Подробности, итоги дня, ссылки, блокеры, идеи..."></textarea>
+        </section>
+      </div>
+
+      <div class="drawer-footer">
+        <button type="button" id="drawer-clear-notes-btn" class="btn btn-danger-outline">Очистить записи</button>
+        <button type="button" id="drawer-done-btn" class="btn btn-primary">Готово</button>
+      </div>
+    </aside>
   </div>
 
   <script src="app.js"></script>
